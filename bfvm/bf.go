@@ -39,31 +39,41 @@ func Compile(code string) []Instruction {
 			break
 		}
 
+		const TOKEN_INC_PTR = ">"
+		const TOKEN_DEC_PTR = "<"
+		const TOKEN_INC_VAL = "+"
+		const TOKEN_DEC_VAL = "-"
+		const TOKEN_OUTPUT = "."
+		const TOKEN_INPUT = ","
+		const TOKEN_JUMP_FWD = "["
+		const TOKEN_JUMP_BACK = "]"
+
 		switch {
-		case strings.HasPrefix(code, ">"):
+		case strings.HasPrefix(code, TOKEN_INC_PTR):
 			instructions = append(instructions, Instruction{'>', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, "<"):
+			code = code[len(TOKEN_INC_PTR):]
+		case strings.HasPrefix(code, TOKEN_DEC_PTR):
 			instructions = append(instructions, Instruction{'<', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, "+"):
+			code = code[len(TOKEN_DEC_PTR):]
+		case strings.HasPrefix(code, TOKEN_INC_VAL):
 			instructions = append(instructions, Instruction{'+', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, "-"):
+			code = code[len(TOKEN_INC_VAL):]
+		case strings.HasPrefix(code, TOKEN_DEC_VAL):
 			instructions = append(instructions, Instruction{'-', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, "."):
+			code = code[len(TOKEN_DEC_VAL):]
+		case strings.HasPrefix(code, TOKEN_OUTPUT):
 			instructions = append(instructions, Instruction{'.', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, ","):
+			code = code[len(TOKEN_OUTPUT):]
+		case strings.HasPrefix(code, TOKEN_INPUT):
 			instructions = append(instructions, Instruction{',', 0})
-			code = code[1:]
-		case strings.HasPrefix(code, "["):
+			code = code[len(TOKEN_INPUT):]
+		case strings.HasPrefix(code, TOKEN_JUMP_FWD):
+			code = code[len(TOKEN_JUMP_FWD):]
 			instructions = append(instructions, Instruction{'[', 0})
-			code = code[1:]
 			//println("[ at ", program_counter)
 			jump_Stack = append(jump_Stack, program_counter)
-		case strings.HasPrefix(code, "]"):
+		case strings.HasPrefix(code, TOKEN_JUMP_BACK):
+			code = code[len(TOKEN_JUMP_BACK):]
 			if len(jump_Stack) == 0 {
 				panic("Unmatched ]")
 			}
@@ -71,7 +81,6 @@ func Compile(code string) []Instruction {
 			jump_Stack = jump_Stack[:len(jump_Stack)-1]
 			instructions = append(instructions, Instruction{']', jmp_pos})
 			instructions[jmp_pos].Operand = program_counter
-			code = code[1:]
 		default:
 			// skip
 			code = code[1:]
